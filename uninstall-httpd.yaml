@@ -1,0 +1,31 @@
+- name: Uninstall httpd daemon
+  hosts: managed-node
+  become: yes
+  vars:
+    - index_dest: "/var/www/html/index.html"
+  tasks:
+    - name: Uninstall httpd
+      dnf: 
+        name: httpd
+        autoremove: yes
+        state: absent
+
+    - name: Deny traffic for https service
+      ansible.posix.firewalld:
+        service: http
+        zone: public
+        permanent: yes
+        state: disabled
+      notify: Reload firewalld
+
+    - name: Remove index.html
+      file: 
+        dest: "{{ index_dest }}" 
+        state: absent
+
+
+  handlers:
+    - name: Reload firewalld
+      systemd:
+        name: firewalld
+        state: reloaded

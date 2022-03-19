@@ -1,0 +1,42 @@
+- name: Install httpd daemon
+  hosts: managed-node
+  become: yes
+  vars:
+    - index_content: "Welcome to my web serverWelcome to my web server\r\n" 
+    - index_dest: "/var/www/html/index.html"
+  tasks:
+    - name: Install httpd
+      dnf: 
+        name: httpd
+        state: latest
+      notify: Enable httpd and start httpd
+
+    - name: Permit traffic for https service
+      ansible.posix.firewalld:
+        service: http
+        zone: public
+        permanent: yes
+        state: enabled
+      notify: Reload firewalld
+
+    - name: Add index.html
+      copy: 
+        content: "{{ index_content }}"
+        dest: "{{ index_dest }}" 
+      notify: Restart httpd
+
+
+  handlers:
+    - name: Enable httpd and start httpd
+      service: 
+        name: httpd
+        enabled: yes
+        state: started
+    - name: Restart httpd
+      service:
+        name: httpd
+        state: restarted
+    - name: Reload firewalld
+      systemd:
+        name: firewalld
+        state: reloaded
