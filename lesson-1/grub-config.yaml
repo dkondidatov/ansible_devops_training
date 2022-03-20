@@ -1,0 +1,18 @@
+- name: GRUB config
+  become: yes
+  hosts: managed-node
+  vars: 
+    - grub_output_cfg: /boot/grub2/grub.cfg
+    - grub_input_cfg: /etc/default/grub
+  tasks:
+    - name: Update grub cfg
+      lineinfile:
+        dest: "{{ grub_input_cfg }}"
+        regexp: "GRUB_CMDLINE_LINUX"
+        line: 'GRUB_CMDLINE_LINUX="crashkernel=auto resume=/dev/mapper/cs-swap rd.lvm.lv=cs/root rd.lvm.lv=cs/swap rhgb quiet net.ifnames=0 biosdevname=0"'
+      notify: "Make grub cfg"
+ 
+  handlers:
+    - name: Make grub cfg 
+      command: "grub2-mkconfig -o {{ grub_input_cfg }}"
+
