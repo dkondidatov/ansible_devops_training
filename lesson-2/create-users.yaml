@@ -1,0 +1,59 @@
+- name: Create users
+  hosts: managed-node
+  become: yes
+  vars:
+    user_list:
+      - name: "Alice"
+        comment: "alice@example.com"
+        password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          33393133366430383833333563376663366236303565303331363931343039646462316232373937
+          3634363862343862316266646330613733386138393264320a356333316466343866623763323633
+          66653035376561306162626533303437353561306337356333303564346566323561386361363932
+          6336636433383634660a653931383739323364636238663364303534616265633164626266366564
+          3935
+      - name: "Bob"
+        comment: "bob@example.com"
+        password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          39376661393134633163343231333066306636306630373564353138653565616435363065356533
+          3164323635343735653131636530333034356363323464390a313936373464316434653232323638
+          32313763353338613933623032613233363663666131383165623532306331626232323636613037
+          3962643862636137660a363664376434306431633937336364313734343462623134393035666661
+          3866
+      - name: "Carol"
+        comment: "carol@exapmle.com"
+        password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          61326133646263646231316565376163333538323664656264636537663635386336663030396631
+          3630393436313239316231623063646533393530356236370a353639366635393434663938626266
+          31653038366539633435376264613366393339306464663166653265363664666266373335346162
+          3138663638333965390a666630366133353939323764373064316538343831303165393030656463
+          3438
+      - name: "Mark"
+        comment: "mark@example.com"
+        password: "1234321"
+
+
+  tasks: 
+    - name: Create users from user_list
+      ansible.builtin.user: 
+        name: "{{ item.name }}"
+        state: present 
+        comment: "{{ item.comment }}"
+      with_items: "{{ user_list }}"
+      register: created_users  
+      notify: Set user password 
+    
+      #   - name: Debug
+      #loop: "{{ created_users.results | selectattr('changed', 'equalto', true) | selectattr('state', 'equalto', 'present') | map(attribute='item')  | list }}"
+      #ansible.builtin.debug: 
+      #  msg: "{{ item.name }}"
+  
+  handlers:
+    - name: Set user password
+      loop: "{{ created_users.results | selectattr('changed', 'equalto', true) | selectattr('state', 'equalto', 'present') | map(attribute='item') |  list }}"
+      ansible.builtin.user: 
+        name: "{{ item.name }}"
+        password: "{{ item.password | password_hash('sha512') }}" #|  password_hash('sha512')
+  
