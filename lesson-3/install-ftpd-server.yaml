@@ -1,0 +1,4 @@
+- hosts: managed-node
+  become: yes
+  roles:
+    - vsftp-server

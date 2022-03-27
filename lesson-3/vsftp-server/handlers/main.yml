@@ -1,0 +1,12 @@
+---
+# handlers file for vsftp-server
+- name: Restart vsftpd
+  service: 
+    name: vsftpd
+    state: restarted 
+
+- name: Start and enable vsftpd
+  service:
+    name: vsftpd
+    state: started
+    enabled: yes

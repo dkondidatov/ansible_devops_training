@@ -1,0 +1,6 @@
+---
+# vars file for http-server
+index_content: "Welcome to my web serverWelcome to my web server\r\n"
+index_dest: "/var/www/html/index.html"
+page_description: "I was created through templates"
+page_title: "I'm HTTP server"

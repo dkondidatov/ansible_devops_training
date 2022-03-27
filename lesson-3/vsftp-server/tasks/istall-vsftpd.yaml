@@ -1,0 +1,75 @@
+---
+
+- name: Install vsftpd 
+  ansible.builtin.dnf:
+    name: vsftpd
+    state: present 
+  notify: Start and enable vsftpd
+
+- name: Create ftp nologin user
+  user:
+    name: "{{ vsftpd_user_name }}"
+    shell: /sbin/nologin
+    create_home: yes 
+    comment: "Ftp nologin User"
+    state: present
+  become: true
+
+- name: Create user config dir
+  ansible.builtin.file: 
+    path: "{{ vsftpd_user_config_dir }}"
+    state: directory
+    owner: root
+
+- name: Create directory for anon_root only R from vsftpd.conf
+  ansible.builtin.file:
+    path: "{{ vsftpd_anon_root }}"
+    state: directory
+    owner: root
+    group: root 
+    mode: u=rwx,g=rwx,o=rx
+    setype: public_content_t
+
+- name: Create directory for anon_root RW
+  ansible.builtin.file:
+    path: "{{ vsftpd_anon_root }}/uploads/"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rwx,o=rwx
+
+- name: Permit traffic for ftpd service
+  ansible.posix.firewalld:
+    service: ftp
+    zone: public
+    immediate: yes
+    permanent: yes
+    state: enabled
+
+- name: Permit traffic for 20-21/tcp
+  ansible.posix.firewalld:
+    port: 20-21/tcp
+    zone: public
+    immediate: yes
+    permanent: yes
+    state: enabled
+
+- name: Permit traffice for 30000-31000/tcp
+  ansible.posix.firewalld:
+    port: 30000-31000/tcp
+    zone: public
+    immediate: yes
+    permanent: yes
+    state: enabled
+
+- include_tasks: selinux-config.yaml
+
+- name: copy config file of the vsftpd
+  template: 
+    src: vsftpd.conf 
+    dest: "{{ vsftpd_user_config_dir }}"
+    mode: 644 
+    backup: yes
+  notify:
+    - Restart vsftpd
+

@@ -1,0 +1,31 @@
+---
+# tasks file for http-server
+- name: Install httpd RedHat
+  dnf:
+    name: httpd
+    state: latest
+  notify: Enable httpd and start httpd
+  when: ansible_facts['os_family'] == "RedHat"
+
+# Wasn't tested
+- name: Install httpd Debian
+  apt:
+    name: apache2 
+    update_cache: yes 
+    state: latest
+  when: ansible_facts['os_family'] == "Debian"  
+
+- name: Permit traffic for https service
+  ansible.posix.firewalld:
+    service: http
+    zone: public
+    permanent: yes
+    state: enabled
+  notify: Reload firewalld
+
+- name: Add index.html
+  template:
+    src: index.html.j2
+    dest: "{{ index_dest }}"
+  notify: Restart httpd
+

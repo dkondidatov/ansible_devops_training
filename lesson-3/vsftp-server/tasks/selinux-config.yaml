@@ -1,0 +1,25 @@
+- name: Install libsemanage
+  ansible.builtin.dnf:
+    name: python3-libsemanage 
+    state: present
+
+#- name: Allow full read/write access through SELinux for el7+
+#  seboolean:
+#    name: ftp_home_dir
+#    state: yes
+#    persistent: yes
+
+- name: Allow full read/write access through SELinux for el7+
+  seboolean:
+    name: ftpd_full_access
+    state: yes
+    persistent: yes
+
+- name: SELinux allow ftp_anon_write
+  ansible.posix.seboolean:
+    name: ftpd_anon_write
+    state: yes
+    persistent: yes
+
+
+

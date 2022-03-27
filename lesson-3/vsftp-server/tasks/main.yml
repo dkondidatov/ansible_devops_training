@@ -1,0 +1,4 @@
+---
+# tasks file for vsftp-server
+
+- include_tasks: istall-vsftpd.yaml 

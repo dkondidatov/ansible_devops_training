@@ -1,0 +1,18 @@
+---
+# handlers file for http-server
+  - name: Enable httpd and start httpd
+    service:
+      name: httpd
+      enabled: yes
+      state: started
+  
+  - name: Restart httpd
+    service:
+      name: httpd
+      state: restarted
+  
+  - name: Reload firewalld
+    systemd:
+      name: firewalld
+      state: reloaded
+

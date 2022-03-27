@@ -1,0 +1,13 @@
+---
+# vars file for vsftp-server
+
+vsftpd_user_name: ftp
+vsftpd_ftpd_banner: Welcome to FTP
+vsftpd_xferlog_enable: 'YES'
+vsftpd_user_config_dir: /etc/vsftpd/
+vsftpd_anon_root: /var/ftp/pub
+vsftpd_max_per_ip: 100
+vsftpd_pasv_min_port: 30000
+vsftpd_pasv_max_port: 31000
+vsftpd_tls_only: 'YES'
+vsftpd_ssl_enable: 'YES'
